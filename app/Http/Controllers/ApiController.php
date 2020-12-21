@@ -132,21 +132,27 @@ class ApiController extends Controller
 
 	//บันทึกรถสมาชิก
 public function carmember(Request $request){
-        $id=$request->input('id');
-        $carser=$request->input('car_service');
-        $color=$request->input('color');
-        $carnumber=$request->input('car_number');
-        $brand=$request->input('brand');
-        $type=$request->input('type');
-        $save=DB::table('car_member')
-        ->insert([
-            'car_service_id'=>$carser,
-            'member_id'=>$id,
-            'car_member_number'=>$carnumber,
-            'color_id'=>$color,
-            'car_member_brand'=>$brand
-        ]);
-        return $save;
+
+        if($request->input('id')!=null&&$request->input('car_service')!=null&&$request->input('color')!=null&&$request->input('car_number')!=null&&$request->input('brand')!=null&&$request->input('type')!=null){
+            $id=$request->input('id');
+            $carser=$request->input('car_service');
+            $color=$request->input('color');
+            $carnumber=$request->input('car_number');
+            $brand=$request->input('brand');
+            $type=$request->input('type');
+            $save=DB::table('car_member')
+            ->insert([
+                'car_service_id'=>$carser,
+                'member_id'=>$id,
+                'car_member_number'=>$carnumber,
+                'color_id'=>$color,
+                'car_member_brand'=>$brand
+            ]);
+            if($save){
+                return 1;
+            }
+        }
+
 
      }
 

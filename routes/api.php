@@ -30,3 +30,4 @@ Route::post('history','App\Http\Controllers\ApiController@history');
 Route::get('listcarcare', 'App\Http\Controllers\ApiController@listcarcare');
 Route::post('listcarmember','App\Http\Controllers\ApiController@listcarmember');
 Route::post('attribute','App\Http\Controllers\ApiController@attribute');
+Route::post('queue','App\Http\Controllers\ApiController@queue');

@@ -253,12 +253,22 @@ public function carmember(Request $request){
        ->select(
            $carid='car_member_id',
            $carser='car_service_name',
-          $color='color_name',
+           $color='color_name',
            $car_number='car_member_number',
            $brand='car_member_brand'
            )
        ->get();
-       return response()->json($data);
+       $datas=[];
+       $i=0;
+       foreach ($data as $value) {
+        $datas[$i]["id"]=$value->car_member_id;
+        $datas[$i]["sername"]=$value->car_service_name;
+        $datas[$i]["color"]=$value->color_name;
+        $datas[$i]["carnumber"]=$value->car_member_number;
+        $datas[$i]["brand"]=$value->car_member_brand;
+        $i++;
+       }
+       return response()->json($datas);
 
     }
 	//แสดงรายการของร้านคาร์แคร์
@@ -335,6 +345,107 @@ public function carmember(Request $request){
         }
         return $getdata;
 
+    }
+    //จองคิว
+    public function queue(Request $request){
+       $main = $request->input(0);
+       $num = count($request->input());
+       $data=[];
+       for($i=1;$i<$num;$i++){
+            $vl= $request->input($i);
+            $data[$i-1]=$vl["attribute"];
+       }
+
+
+        $id = $main["id"];
+        $id_member_car = $main["cmd"];
+        $id_carcare = $main["cid"];
+
+        //ดึงไซต์ออกมา
+        $attr=DB::table('car_member')
+        ->leftJoin('car_service','car_member.car_service_id','=','car_service.car_service_id')
+        ->where('car_member_id',$id_member_car)
+        ->select('car_service.car_service_size')
+        ->get();
+        $size=$attr[0]->car_service_size;
+        switch ($size) {
+            case 's':
+                $size="attribute_s";
+                break;
+            case 'm':
+                $size="attribute_m";
+                break;
+            case 'l':
+                $size="attribute_l";
+                break;
+            case 'xl':
+                $size="attribute_xl";
+                break;
+            case 'xxl':
+                $size="attribute_xxl";
+                break;
+        }
+
+         //บันทึกqueue
+         $saves=DB::table('queue')
+         ->insertGetId([
+             'member_id'=>$id,
+             'car_member_id'=>$id_member_car,
+             'carcare_id'=>$id_carcare,
+             'create_date'=>now()
+         ]);
+
+         if ($saves) {
+
+            // บันทึกรายการคิว
+            foreach ($data as $value) {
+
+                    DB::table('queue_list')->insert([
+                        'list_id'=>$value,
+                        'queue_id'=>$saves
+                    ]);
+
+            }
+            $getdata=DB::table('attribute')
+              ->whereIn('attribute.attribute_id',$data)
+              ->select($size='attribute.'.$size)
+              ->get();
+
+              $time=0;
+              foreach ($getdata as  $value) {
+                foreach ($value as $v) {
+                  $time+=$v;
+                }
+
+            }
+            $count = DB::table('queue')
+            ->where('create_date',date('Y-m-d'))
+            ->count('*');
+
+            $count = DB::table('queue')
+            ->where('queue_id',$saves)
+            ->update(['all_time'=>$time,'queue_order'=>$count]);
+
+            $status = DB::table('queue')
+            ->where('create_date',date('Y-m-d'))
+            ->where('status_id',0)
+            ->count('*');
+            $progress = DB::table('queue')
+            ->where('create_date',date('Y-m-d'))
+            ->where('status_id',1)
+            ->count('*');
+
+            $getvalue=DB::table('queue')
+            ->leftJoin('status','queue.status_id','=','status.status_id')
+            ->where("queue_id",$saves)
+            ->limit(1)
+            ->select("queue_id","all_time","status.status_name")
+            ->get();
+            $getvalue[0]->queue=$status;
+            $getvalue[0]->progress=$progress;
+            return $getvalue;
+
+         }
     }
 
     /**

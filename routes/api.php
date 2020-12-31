@@ -31,3 +31,6 @@ Route::get('listcarcare', 'App\Http\Controllers\ApiController@listcarcare');
 Route::post('listcarmember','App\Http\Controllers\ApiController@listcarmember');
 Route::post('attribute','App\Http\Controllers\ApiController@attribute');
 Route::post('queue','App\Http\Controllers\ApiController@queue');
+Route::post('checkstatus','App\Http\Controllers\ApiController@checkstatus');
+Route::post('checkqueue','App\Http\Controllers\ApiController@checkqueue');
+Route::post('updatequeue','App\Http\Controllers\ApiController@updatequeue');

@@ -14,14 +14,19 @@ class ApiController extends Controller
      */
     public function index()
     {
-        //
-        $member=DB::table('member')->get();
+       $member=DB::table('member')->get();
         return response()->json($member);
     }
-    public function test(Request $request)
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
     {
         //
-        return response()->json($request->input());
     }
 
 	//ลงชื่อเข้าใช้
@@ -141,7 +146,7 @@ public function carmember(Request $request){
             $brand=$request->input('brand');
             $type=$request->input('type');
             $save=DB::table('car_member')
-            ->insert([
+            ->insertGetId([
                 'car_service_id'=>$carser,
                 'member_id'=>$id,
                 'car_member_number'=>$carnumber,
@@ -149,11 +154,13 @@ public function carmember(Request $request){
                 'car_member_brand'=>$brand
             ]);
             if($save){
-                return 1;
-            }
+                return "ok";
+            }else{
+            return null;
         }
-
-
+        }else{
+            return null;
+        }
      }
 
 	//ประว้ติรายการจองคิว
@@ -179,12 +186,14 @@ public function carmember(Request $request){
 	public function listcarcare(Request $request){
         $datas=DB::table('carcare')
         ->leftJoin('queue','carcare.carcare_id','=','queue.carcare_id')
+        // ->where('queue.create_date',date('Y-m-d'))
         ->select([
             'carcare_id' =>"carcare.carcare_id",
             'carcare_name' =>"carcare.carcare_name",
             'score' =>"queue.score",
             'all_time' => "queue.all_time",
-            'status_id' => "queue.status_id"
+            'status_id' => "queue.status_id",
+            'create_date' => 'queue.create_date'
         ])->get();
             $data=[];
             $carcare[][]=[];
@@ -200,34 +209,41 @@ public function carmember(Request $request){
                 //เอาไอดีมาวนลูปเพื่อเก็บค่าเป็นชุดๆ
                 if (!empty($item)) {
                     //เช็คข้อมูลว่าถ้าไม่ว่างให้ทำในนี้
-                    $num=0;
+                    $num=1;
                     $score=0;
                     $status=0;
                     $name=null;
                     $alltime=0;
                         foreach($data as $items){
 
-                               // เอาชุดข้อมูลมาวนลูปใหม่
+                             // เอาชุดข้อมูลมาวนลูปใหม่
                                 if ($item == $items['carcare_id']) {
-                                $num++;
-                                $score+= (int)$items['score'];
+                                    if ($items['status_id']!=null&&$items['create_date']==date('Y-m-d')&&$items['status_id']!='3') {
+                                        $num++;
+                                        $score+= (int)$items['score'];
+                                        $name=$items['carcare_name'];
+                                        $status++;
+                                    $alltime+=$items['all_time'];
+                                    }
 
                                 if (empty($name)) {
                                     $name=$items['carcare_name'];
-                                }
-                                if ($items['status_id']!='3') {
-                                    $status++;
-                                    $alltime+=$items['all_time'];
                                 }
                             }
 
                         }
                         $carcare[$i][$item]['id']=$item;
                         $carcare[$i][$item]['name']=$name;
-                        $carcare[$i][$item]['num']=$num;
+                        $carcare[$i][$item]['num']=$num-1;
                         $carcare[$i][$item]['score']=$score/$num;
-                        $carcare[$i][$item]['alltime']=$alltime;
+					$h=0;
+					while ($alltime >= 60) {
+                            $h++;
+                            $alltime=$alltime-60;
+                        }
 
+                        $carcare[$i][$item]['hour']=$h;
+                        $carcare[$i][$item]['minute']=$alltime;
                 }
                 $i++;
             }
@@ -235,7 +251,7 @@ public function carmember(Request $request){
             $datass=[];
             foreach ($carcare as $key => $value) {
                 if ($key) {
-                    foreach ($value as $k => $v) {
+                    foreach ($value as $v) {
 
                        $datass[]= $v;
                     }
@@ -253,12 +269,12 @@ public function carmember(Request $request){
        ->select(
            $carid='car_member_id',
            $carser='car_service_name',
-           $color='color_name',
+          $color='color_name',
            $car_number='car_member_number',
            $brand='car_member_brand'
            )
        ->get();
-       $datas=[];
+    $datas=[];
        $i=0;
        foreach ($data as $value) {
         $datas[$i]["id"]=$value->car_member_id;
@@ -346,7 +362,7 @@ public function carmember(Request $request){
         return $getdata;
 
     }
-    //จองคิว
+//จองคิว
     public function queue(Request $request){
        $main = $request->input(0);
        $num = count($request->input());
@@ -358,7 +374,7 @@ public function carmember(Request $request){
 
 
         $id = $main["id"];
-        $id_member_car = $main["cmd"];
+        $id_member_car = $main["cmid"];
         $id_carcare = $main["cid"];
 
         //ดึงไซต์ออกมา
@@ -406,6 +422,7 @@ public function carmember(Request $request){
                     ]);
 
             }
+            //เอาเวลาแต่ละรายการมาบวก
             $getdata=DB::table('attribute')
               ->whereIn('attribute.attribute_id',$data)
               ->select($size='attribute.'.$size)
@@ -418,45 +435,131 @@ public function carmember(Request $request){
                 }
 
             }
+			 //นับลำดับ
             $count = DB::table('queue')
             ->where('create_date',date('Y-m-d'))
+            ->where('carcare_id',$id_carcare)
             ->count('*');
 
+			 //ใส่ลำดับ
             $count = DB::table('queue')
             ->where('queue_id',$saves)
             ->update(['all_time'=>$time,'queue_order'=>$count]);
 
-            $status = DB::table('queue')
+
+            $getId=null;
+            $data=DB::table('queue')
+            ->where('member_id',$id)
+            ->whereNotIn('status_id', [3])
             ->where('create_date',date('Y-m-d'))
-            ->where('status_id',0)
+            ->select('queue_id','carcare_id')->get();
+            if (count($data)>0) {
+                $getId = $data[0]->queue_id;
+
+            }
+
+        $getvalue=DB::table('queue')
+            ->leftJoin('status','queue.status_id','=','status.status_id')
+            ->where("queue_id",$getId)
+            ->limit(1)
+            ->select("queue_id","all_time","status.status_name","status.status_id","carcare_id","queue_order")
+            ->get();
+
+		  $status = DB::table('queue')
+            ->where('create_date',date('Y-m-d'))
+            ->where('carcare_id',$getvalue[0]->carcare_id)
+			  ->where('status_id',1)
+			  ->where('queue_order',"<",$getId)
+			  ->whereNotIn("queue_id",[$getId])
             ->count('*');
             $progress = DB::table('queue')
             ->where('create_date',date('Y-m-d'))
-            ->where('status_id',1)
+            ->where('status_id',2)
+			->whereNotIn("queue_id",[$getId])
+				->where('queue_order',"<",$getId)
+			->where('carcare_id',$getvalue[0]->carcare_id)
             ->count('*');
-
-            $getvalue=DB::table('queue')
-            ->leftJoin('status','queue.status_id','=','status.status_id')
-            ->where("queue_id",$saves)
-            ->limit(1)
-            ->select("queue_id","all_time","status.status_name")
-            ->get();
             $getvalue[0]->queue=$status;
             $getvalue[0]->progress=$progress;
             return $getvalue;
 
          }
     }
+	public function checkstatus(Request $request){
+        $id =$request->input("id");
+        $data=null;
+        $data=DB::table('queue')
+        ->where('member_id',$id)
+        ->whereNotIn('status_id', [3])
+        ->where('create_date',date('Y-m-d'))
+        ->select('status_id')->get();
+        if (count($data)>0) {
+            return $data[0]->status_id;
+        }
+        else{
+            return;
+        }
+        return;
+    }
+	public function checkqueue(Request $request){
+        $id =$request->input("id");
+        $data=null;
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+            $getId=null;
+            $data=DB::table('queue')
+            ->where('member_id',$id)
+            ->whereNotIn('status_id', [3])
+            ->where('create_date',date('Y-m-d'))
+            ->select('queue_id','carcare_id')->get();
+            if (count($data)>0) {
+                $getId = $data[0]->queue_id;
+
+            }
+
+        $getvalue=DB::table('queue')
+            ->leftJoin('status','queue.status_id','=','status.status_id')
+            ->where("queue_id",$getId)
+            ->limit(1)
+            ->select("queue_id","all_time","status.status_name","status.status_id","carcare_id","queue_order")
+            ->get();
+
+		  $status = DB::table('queue')
+            ->where('create_date',date('Y-m-d'))
+            ->where('carcare_id',$getvalue[0]->carcare_id)
+			  ->where('status_id',1)
+			  ->where('queue_order',"<",$getId)
+			  ->whereNotIn("queue_id",[$getId])
+            ->count('*');
+            $progress = DB::table('queue')
+            ->where('create_date',date('Y-m-d'))
+            ->where('status_id',2)
+			->whereNotIn("queue_id",[$getId])
+				->where('queue_order',"<",$getId)
+			->where('carcare_id',$getvalue[0]->carcare_id)
+            ->count('*');
+            $getvalue[0]->queue=$status;
+            $getvalue[0]->progress=$progress;
+            return $getvalue;
+    }
+	 public function updatequeue(Request $request){
+        $id = $request->input("qid");
+        $statusId = $request->input("statusid");
+        $datas=DB::table('queue')
+        ->where('queue_id',$id)
+        ->update(['status_id'=>$statusId]);
+
+        $data=DB::table('queue')
+        ->where('queue_id',$id)
+        ->where('status_id',3)
+        ->where('create_date',date('Y-m-d'))
+        ->select('status_id')->get();
+        if (count($data)>0) {
+             return $data[0]->status_id;
+        }
+        else{
+            return;
+        }
+        return $datas;
     }
 
     /**
@@ -468,7 +571,6 @@ public function carmember(Request $request){
     public function show($id)
     {
         //
-        return response()->json(['id'=>$id]);
     }
 
     /**

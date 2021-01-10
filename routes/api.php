@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::apiResource('longdo','App\Http\Controllers\ApiController');
+//ส่วนของลูกค้า
 Route::post('login','App\Http\Controllers\ApiController@login');
 Route::post('create','App\Http\Controllers\ApiController@create');
 Route::post('showprofile','App\Http\Controllers\ApiController@showprofile');
@@ -35,3 +35,10 @@ Route::post('checkstatus','App\Http\Controllers\ApiController@checkstatus');
 Route::post('checkqueue','App\Http\Controllers\ApiController@checkqueue');
 Route::post('updatequeue','App\Http\Controllers\ApiController@updatequeue');
 Route::post('RatingReview','App\Http\Controllers\ApiController@RatingReview');
+
+//ส่วนของคาร์แคร์
+Route::post('logincarcare','App\Http\Controllers\CarcareController@login');
+Route::post('create','App\Http\Controllers\CarcareController@create');
+Route::post('addcarcare','App\Http\Controllers\CarcareController@addcarcare');
+Route::post('addname','App\Http\Controllers\CarcareController@addname');
+Route::post('menucarcare','App\Http\Controllers\CarcareController@menucarcare');

@@ -42,3 +42,6 @@ Route::post('create','App\Http\Controllers\CarcareController@create');
 Route::post('addcarcare','App\Http\Controllers\CarcareController@addcarcare');
 Route::post('addname','App\Http\Controllers\CarcareController@addname');
 Route::post('menucarcare','App\Http\Controllers\CarcareController@menucarcare');
+Route::post('updatecarcare','App\Http\Controllers\CarcareController@updatecarcare');
+Route::get('member_carcare','App\Http\Controllers\CarcareController@member_carcare');
+Route::post('addmember','App\Http\Controllers\CarcareController@addmember');

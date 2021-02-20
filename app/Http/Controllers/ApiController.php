@@ -12,6 +12,12 @@ class ApiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+	public function __construct()
+    {
+        $this->api_url = "https://fcm.googleapis.com/fcm/send";
+        $this->server_key = "key=AAAAR3-D5NQ:APA91bG-cF8IpLDzLSttTFv02ivuPhM9zmW8M2ZLYNYUsFbsVgK_hZqp9ddLNUo98SZh3-o5yobnZoPGjIH2Dd637esykLJQlauHbgzb60ydqPlPJRGaMphOJK0JPFv3HTXzNgZiZ1DG";
+    }
+
     public function index()
     {
        $member=DB::table('member')->get();
@@ -34,12 +40,15 @@ class ApiController extends Controller
         $phone=$request->input('phone');
         $pass=$request->input('pass');
         $type=$request->input('type');
-        $user = DB::table('member')
+		if($type==3){
+			$user = DB::table('member')
         ->where('member_phone', $phone)
         ->where('member_pass', $pass)
         ->where('member_type', $type)
         ->select('member_id')
         ->first();
+		}
+
         if(!empty($user)){
            // return $user;
            //return view('menu',['data'=>$user]);
@@ -58,7 +67,7 @@ class ApiController extends Controller
         $pass=$request->input('pass');
         $type=$request->input('type');
 
-        if (!empty($phone)&&!empty($pass)) {
+        if (!empty($phone)&&!empty($pass)&&$type==3) {
            $user=DB::table('member')
         ->where('member_phone', $phone)
         ->count();
@@ -171,7 +180,7 @@ public function carmember(Request $request){
         ->leftJoin('car_member','queue.car_member_id','=','car_member.car_member_id')
         ->leftJoin('car_service','car_member.car_service_id','=','car_service.car_service_id')
         ->where('queue.member_id',$id)
-        ->where('queue.status_id','3')
+        ->where('queue.status_id',['3','4'])
         ->select([
 			'queueId' => "queue.queue_id",
             'carcare_name' => "carcare.carcare_name",
@@ -185,7 +194,17 @@ public function carmember(Request $request){
 
 	//รายการร้านคาร์แคร์
 	public function listcarcare(Request $request){
-       	$datenow =$request->input("datenow");
+           $datenow =$request->input("datenow");
+           $old_date = explode('/',$datenow);
+           if($old_date[1]<=9){
+			$old_date[1] ="0".$old_date[1];
+		    }
+		    if($old_date[0]<=9){
+			$old_date[0] ="0".$old_date[0];
+		    }
+           $datenow = '20'.$old_date[2].'-'.$old_date[1].'-'.$old_date[0];
+
+
 		$datas=DB::table('carcare')
         ->leftJoin('queue','carcare.carcare_id','=','queue.carcare_id')
         ->select([
@@ -195,7 +214,7 @@ public function carmember(Request $request){
             'all_time' => "queue.all_time",
             'status_id' => "queue.status_id",
             'create_date' => 'queue.create_date'
-        ])->get();
+        ])->orderByDesc("carcare_id")->get();
             $data=[];
             $carcare[][]=[];
         $data = json_decode(json_encode($datas), true);
@@ -224,7 +243,8 @@ public function carmember(Request $request){
                                         $score[$runscore]= (int)$items['score'];
                                         $runscore++;
                                     }
-                                    if ($items['status_id']!=null&&$items['create_date']==$datenow&&$items['status_id']!='3') {
+                                    if ($items['create_date']==$datenow&&($items['status_id']!='3'||$items['status_id']!='4')) {
+
                                         $num++;
 
                                         $name=$items['carcare_name'];
@@ -292,7 +312,7 @@ public function carmember(Request $request){
           $color='color_name',
            $car_number='car_member_number',
            $brand='car_member_brand'
-           )
+           )->orderByDesc("car_member_id")
        ->get();
     $datas=[];
        $i=0;
@@ -397,6 +417,15 @@ public function carmember(Request $request){
         $id_member_car = $main["cmid"];
         $id_carcare = $main["cid"];
         $create_date =$main["createdate"];
+
+        $old_date = explode('/',$create_date);
+        if($old_date[1]<=9){
+			$old_date[1] ="0".$old_date[1];
+		    }
+		    if($old_date[0]<=9){
+			$old_date[0] ="0".$old_date[0];
+		    }
+        $create_date = '20'.$old_date[2].'-'.$old_date[1].'-'.$old_date[0];
 
         //ดึงไซต์ออกมา
         $attr=DB::table('car_member')
@@ -509,10 +538,18 @@ public function carmember(Request $request){
 	public function checkstatus(Request $request){
         $id =$request->input("id");
         $datenow =$request->input("datenow");
+        $old_date = explode('/',$datenow);
+        if($old_date[1]<=9){
+			$old_date[1] ="0".$old_date[1];
+		    }
+		    if($old_date[0]<=9){
+			$old_date[0] ="0".$old_date[0];
+		    }
+        $datenow = '20'.$old_date[2].'-'.$old_date[1].'-'.$old_date[0];
         $data=null;
         $data=DB::table('queue')
         ->where('member_id',$id)
-        ->whereNotIn('status_id', [3])
+        ->whereNotIn('status_id', [3,4])
         ->where('create_date',$datenow)
         ->select('status_id')->get();
         if (count($data)>0) {
@@ -526,12 +563,20 @@ public function carmember(Request $request){
 	public function checkqueue(Request $request){
         $id =$request->input("id");
         $datenow =$request->input("datenow");
+        $old_date = explode('/',$datenow);
+        if($old_date[1]<=9){
+			$old_date[1] ="0".$old_date[1];
+		    }
+		    if($old_date[0]<=9){
+			$old_date[0] ="0".$old_date[0];
+		    }
+        $datenow = '20'.$old_date[2].'-'.$old_date[1].'-'.$old_date[0];
         $data=null;
 
             $getId=null;
             $data=DB::table('queue')
             ->where('member_id',$id)
-            ->whereNotIn('status_id', [3])
+            ->whereNotIn('status_id', [3,4])
             ->where('create_date',$datenow)
             ->select('queue_id','carcare_id')->get();
             if (count($data)>0) {
@@ -564,9 +609,17 @@ public function carmember(Request $request){
             $getvalue[0]->progress=$progress;
             return $getvalue;
     }
-	 public function updatequeue(Request $request){
+	public function updatequeue(Request $request){
         $id = $request->input("qid");
         $datenow =$request->input("datenow");
+        $old_date = explode('/',$datenow);
+        if($old_date[1]<=9){
+			$old_date[1] ="0".$old_date[1];
+		    }
+		    if($old_date[0]<=9){
+			$old_date[0] ="0".$old_date[0];
+		    }
+        $datenow = '20'.$old_date[2].'-'.$old_date[1].'-'.$old_date[0];
         $statusId = $request->input("statusid");
         $datas=DB::table('queue')
         ->where('queue_id',$id)
@@ -574,16 +627,12 @@ public function carmember(Request $request){
 
         $data=DB::table('queue')
         ->where('queue_id',$id)
-        ->where('status_id',3)
         ->where('create_date',$datenow)
-        ->select('status_id')->get();
-        if (count($data)>0) {
-             return $data[0]->status_id;
-        }
-        else{
-            return;
-        }
-        return $datas;
+        ->where('status_id',4)
+        ->orwhere('status_id',3)
+        ->select('status_id','carcare_id')->first();
+
+        return response()->json($data);
     }
 	public function RatingReview(Request $request){
         $id = $request->input("id");
@@ -615,6 +664,122 @@ public function carmember(Request $request){
             return response()->json($datas);
 
     }
+	 //ส่งการแจ้งเตือนสถานะ
+    public function sentstatus(Request $request){
+        $carcare_id = $request->post("carcare_id");
+        $carcare_member_token = DB::table('member')
+                                    ->where('member_type',2)
+                                    ->where('carcare_id',$carcare_id)
+                                    ->select('token')
+                                    ->get();
+                                    // return $carcare_member_token[0]->token;
+                                    $token_target=null;
+                                    for ($i=0; $i <count($carcare_member_token) ; $i++) {
+                                        if($token_target==null){
+                                            $token_target='"'.$carcare_member_token[$i]->token.'"';
+                                           }else{
+                                               $token_target.=',"'.$carcare_member_token[$i]->token.'"';
+                                           }
+                                    }
+                                    $token_target="[".$token_target."]";
+                                    $color = "#004578";
+                                        $title ="การจองคิวใหม่";
+                                        $body = "เข้าไปดูที่เมนูจัดการคิว";
+
+                                        $json = "{
+                                            \"registration_ids\" : $token_target,
+                                            \"priority\" : \"high\",
+                                            \"notification\" : {
+                                              \"body\"  : \"$body\",
+                                              \"title\" : \"$title\",
+                                              \"icon\"  : \"myicon\",
+                                              \"color\" : \"$color\",
+											  \"click_action\":\"OPEN_FROM_NOTIFICATION_QUEUE\"
+                                              }
+                                        }";
+                                        $context = stream_context_create(array(
+                                            'http' => array(
+                                                'method' => "POST",
+                                                'header' => "Authorization: ".$this->server_key."\r\n".
+                                                            "Content-Type: application/json\r\n",
+                                                'content' => "$json"
+                                            )
+                                        ));
+                                        $response = file_get_contents($this->api_url, FALSE, $context);
+
+                                        if($response === FALSE){
+                                            die('Error');
+                                        }else{
+                                            echo $response;
+                                        }
+    }
+   //ส่งการแจ้งเตือนสถานะการยกเลิก
+    public function sentstatuscencel(Request $request){
+        $carcare_id = $request->post("carcare_id");
+        $carcare_member_token = DB::table('member')
+                                    ->where('member_type',2)
+                                    ->where('carcare_id',$carcare_id)
+                                    ->select('token')
+                                    ->get();
+                                    // return $carcare_member_token[0]->token;
+                                    $token_target=null;
+                                    for ($i=0; $i <count($carcare_member_token) ; $i++) {
+                                        if($token_target==null){
+                                            $token_target='"'.$carcare_member_token[$i]->token.'"';
+                                           }else{
+                                               $token_target.=',"'.$carcare_member_token[$i]->token.'"';
+                                           }
+                                    }
+                                    $token_target="[".$token_target."]";
+                                    $color = "#004578";
+                                        $title ="มีการยกเลิกคิว";
+                                        $body = "เข้าไปดูที่เมนูประวัติการจองคิว";
+
+                                        $json = "{
+                                            \"registration_ids\" : $token_target,
+                                            \"priority\" : \"high\",
+                                            \"notification\" : {
+                                              \"body\"  : \"$body\",
+                                              \"title\" : \"$title\",
+                                              \"icon\"  : \"myicon\",
+                                              \"color\" : \"$color\",
+											   \"click_action\":\"OPEN_FROM_NOTIFICATION_REPORT\"
+                                              }
+                                        }";
+                                        $context = stream_context_create(array(
+                                            'http' => array(
+                                                'method' => "POST",
+                                                'header' => "Authorization: ".$this->server_key."\r\n".
+                                                            "Content-Type: application/json\r\n",
+                                                'content' => "$json"
+                                            )
+                                        ));
+                                        $response = file_get_contents($this->api_url, FALSE, $context);
+
+                                        if($response === FALSE){
+                                            die('Error');
+                                        }else{
+                                            echo $response;
+                                        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Display the specified resource.

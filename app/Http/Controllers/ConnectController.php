@@ -8,7 +8,7 @@ use DB;
 class ConnectController extends Controller
 
 {
-    public function login(Request $request){
+    public function menu(Request $request){
         $phone=$request->input('phone');
         $pass=$request->input('pass');
         $type=$request->input('type');

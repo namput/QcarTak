@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserAuth;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DataTableAjaxCRUDController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,33 +16,45 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Route::get('login', function () {
-    return view('login');
+    if (session()->has('user')) {
+        return redirect('/');
+    }
+    return view('loginadmin');
 });
-Route::post('users', function () {
-    return false;
+Route::get('logout', function () {
+    if (session()->has('user')) {
+        session()->pull('user');
+    }
+    return view('loginadmin');
 });
-Route::get('create_user', function () {
-    return false;
+//Route::view('profile', 'profile');
+Route::get('/', function () {
+    if (session()->has('user')) {
+        return view('profile');
+    }
+    return redirect('login');
 });
-Route::post('menu', function () {
-    return view('menu');
+Route::get('profile', function () {
+    if (session()->has('user')) {
+        return redirect('/');
+    }
+    return redirect('login');
 });
-Route::get('jason', function () {
-    return view('jason');
+Route::get('demo', function () {
+    if (session()->has('user')) {
+        return redirect('/');
+    }
+    return redirect('login');
 });
 
-Route::post('users', 'App\Http\Controllers\ConnectController@login');
-Route::post('create_user', 'App\Http\Controllers\ConnectController@create');
-Route::post('profile', 'App\Http\Controllers\ConnectController@showprofile');
-Route::post('history', 'App\Http\Controllers\ConnectController@history');
-Route::get('listcarcare', 'App\Http\Controllers\ConnectController@listcarcare');
-Route::post('car_member', 'App\Http\Controllers\ConnectController@car_member');
-Route::post('attribute', 'App\Http\Controllers\ConnectController@attribute');
-Route::post('conform', 'App\Http\Controllers\ConnectController@conform');
+Route::post('checklogin', 'App\Http\Controllers\DashboardController@checklogin');
+Route::post('chart', 'App\Http\Controllers\DashboardController@checklogin');
+Route::post('user', [UserAuth::class,'userLogin']);
+Route::get('getlistcount', [DashboardController::class,'getlistcount']);
+Route::get('getlistcountcarcare', [DashboardController::class,'getlistcountcarcare']);
 
-//test
+Route::get('membercustomer', [DashboardController::class, 'index']);
+Route::post('store-member', [DashboardController::class, 'store']);
+Route::post('edit-member', [DashboardController::class, 'edit']);
+Route::post('delete-member', [DashboardController::class, 'destroy'])->name('delete');

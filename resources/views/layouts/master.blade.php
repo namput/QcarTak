@@ -48,8 +48,8 @@
 
     {{--  <link  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 <link  href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap.min.css" rel="stylesheet">
+<link  href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.bootstrap.min.css" rel="stylesheet">  --}}
 <link  href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.bootstrap.min.css" rel="stylesheet">
-<link  href="https://cdn.datatables.net/select/1.3.1/css/select.bootstrap.min.css" rel="stylesheet">  --}}
 <link  href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet">
 
     <style>
@@ -93,7 +93,7 @@
                             <a href="{{ url('membercustomer') }}">
                                 <i class="fas fa-chart-bar"></i>ระบบจัดการสมาชิก</a>
                         </li>
-                        <li class= @yield('membercarcare',"")>
+                        {{--  <li class= @yield('membercarcare',"")>
                             <a href="table.html">
                                 <i class="fas fa-table"></i>ระบบจัดการ</a>
                         </li>
@@ -162,7 +162,7 @@
                                     <a href="typo.html">Typography</a>
                                 </li>
                             </ul>
-                        </li>
+                        </li>  --}}
                     </ul>
                 </div>
             </nav>
@@ -460,21 +460,20 @@
     <script src="vendor/bootstrap-4.1/popper.min.js"></script>
     <script src="vendor/bootstrap-4.1/bootstrap.min.js"></script>
     <!-- Vendor JS       -->
-    <script src="vendor/slick/slick.min.js">
-    </script>
+    <script src="vendor/slick/slick.min.js"></script>
     <script src="vendor/wow/wow.min.js"></script>
     <script src="vendor/animsition/animsition.min.js"></script>
-    <script src="vendor/bootstrap-progressbar/bootstrap-progressbar.min.js">
-    </script>
+    <script src="vendor/bootstrap-progressbar/bootstrap-progressbar.min.js"></script>
     <script src="vendor/counter-up/jquery.waypoints.min.js"></script>
-    <script src="vendor/counter-up/jquery.counterup.min.js">
-    </script>
+    <script src="vendor/counter-up/jquery.counterup.min.js"></script>
     <script src="vendor/circle-progress/circle-progress.min.js"></script>
     <script src="vendor/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="vendor/chartjs/Chart.bundle.min.js"></script>
-    <script src="vendor/select2/select2.min.js">
-    </script>
+    <script src="vendor/select2/select2.min.js"></script>
 
+    <script src="https://cdn.datatables.net/buttons/1.6.5/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.colVis.min.js"></script>
     <!-- Main JS-->
     <script src="js/main.js"></script>
 

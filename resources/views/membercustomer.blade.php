@@ -3,71 +3,85 @@
 @section('sectionmenu')
 
     <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-    <script>
-        .pagination>li {
-            display: inline;
-            padding:0px !important;
-            margin:0px !important;
-            border:none !important;
-            }
-            .modal-backdrop {
-              z-index: -1 !important;
-            }
-            /*
-            Fix to show in full screen demo
-            */
-            iframe
-            {
-                height:700px !important;
-            }
 
-            .btn {
-            display: inline-block;
-            padding: 6px 12px !important;
-            margin-bottom: 0;
-            font-size: 14px;
-            font-weight: 400;
-            line-height: 1.42857143;
-            text-align: center;
-            white-space: nowrap;
-            vertical-align: middle;
-            -ms-touch-action: manipulation;
-            touch-action: manipulation;
-            cursor: pointer;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            background-image: none;
-            border: 1px solid transparent;
-            border-radius: 4px;
-            }
-
-            .btn-primary {
-            color: #fff !important;
-            background: #428bca !important;
-            border-color: #357ebd !important;
-            box-shadow:none !important;
-            }
-            .btn-danger {
-            color: #fff !important;
-            background: #d9534f !important;
-            border-color: #d9534f !important;
-            box-shadow:none !important;
-            }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover{
-            color: #333 !important;
-    border: 1px solid #979797;
-    background-color: white;
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fff), color-stop(100%, #dcdcdc));
-    background: -webkit-linear-gradient(top, #fff 0%, #dcdcdc 100%);
-    background: -moz-linear-gradient(top, #fff 0%, #dcdcdc 100%);
-    background: -ms-linear-gradient(top, #fff 0%, #dcdcdc 100%);
-    background: -o-linear-gradient(top, #fff 0%, #dcdcdc 100%);
-    background: linear-gradient(to bottom, #fff 0%, #dcdcdc 100%);
+    <style>
+       .itemedit{
+            background: #ffc107 !important;
         }
-    </script>
+        .itemdelete{
+            background: #dc3545 !important;
+        }
+        .zmdi-edit:before {
+            color: #dc3545;
+        }
+        .zmdi-delete:before {
+            color: #ffc107;
+        }
+        td{
+            text-align: center;
+        }
+
+        table.dataTable thead .sorting {
+            text-align: center;
+        }
+        .table-data-feature {
+            justify-content: flex-start !important;
+        }
+        input, textarea {
+            font-family: 'Thasadith',sans-serif;
+            line-height: 40px;
+            border: 1px solid #e5e5e5;
+            font-size: 14px;
+            color: #666;
+            padding: 0 17px;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            border-radius: 3px;
+            -webkit-transition: all 0.5s ease;
+            -o-transition: all 0.5s ease;
+            -moz-transition: all 0.5s ease;
+            transition: all 0.5s ease;
+        }
+        button, input, optgroup, select, textarea  {
+
+            border: none;
+            outline: none;
+            padding-left: 18px;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            border-radius: 3px;
+            height: 40px;
+            background: #fff;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            -moz-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-shadow: 0px 10px 20px 0px rgb(0 0 0 / 3%);
+            -moz-box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.03);
+            box-shadow: 0px 10px 20px 0px rgb(0 0 0 / 3%);
+        }
+         .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            color: #fff !important;
+            font-family: 'Thasadith',sans-serif;
+            border: 1px solid #cc0000;
+            background-color: #cc0000;
+            background: #cc0000;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current{
+            color: #fff !important;
+            font-family: 'Thasadith',sans-serif;
+            border: 1px solid #0062cc;
+            background-color: #0062cc;
+            background: #0062cc;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            color: white !important;
+            border: 1px solid #ffc107;
+            background-color: #ffc107;
+            background: #ffc107;
+        }
+    </style>
 @if ($message = Session::get('success'))
 <div class="alert alert-success">
 <p>{{ $message }}</p>
@@ -83,8 +97,8 @@
                                     <h3 class="title-5">สมาชิกทั้งหมด</h3>
                                 </div>
                                 <div class="table-data__tool-right">
-                                    <button class="au-btn au-btn-icon au-btn--green au-btn--small" onclick="add()">
-                                        <i class="zmdi zmdi-plus"></i>เพิ่มสมาชิก</button>
+                                    <button class="au-btn au-btn-icon au-btn--small btn btn-primary btn-lg active" onclick="add()">
+                                        <i class="fa fa-user-plus" aria-hidden="true"></i>เพิ่มสมาชิก</button>
                                 </div>
 
                             </div>
@@ -98,16 +112,23 @@
                                 <table class="table table-bordered table-hover" id="membercustomer">
                                     <thead>
                                         <tr>
-                                            <th style="text-align: center; width: 10%;">ID</th>
-                                            <th style="text-align: center; width: 30%;">ชื่อ</th>
+                                            <th style="width: 5%;">ID</th>
+                                            <th style="width: 30%;">ชื่อ</th>
                                             <th style="text-align: center; width: 20%;">เบอร์</th>
                                             <th style="text-align: center; width: 15%;">ประเภทสมาชิก</th>
                                             <th style="text-align: center; width: 15%;" >ชื่อคาร์แคร์</th>
-                                            <th width="5%"></th>
+                                            <th style="text-align: center; width: 15%;" ></th>
                                         </tr>
                                     </thead>
                                     <tbody>
-
+                                        <tr>
+                                            <td style="text-align: center; width: 5%;">ID</td>
+                                            <td style="text-align: center; width: 30%;">ชื่อ</td>
+                                            <td style="text-align: center; width: 20%;">เบอร์</td>
+                                            <td style="text-align: center; width: 15%;">ประเภทสมาชิก</td>
+                                            <td style="text-align: center; width: 15%;" >ชื่อคาร์แคร์</td>
+                                            <td style="text-align: center; width: 15%;" ></td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -166,6 +187,7 @@
                                                                     <i class="fa fa-user fa-lg"></i>&nbsp;
                                                                     <span id="adduser">เพิ่มสมาชิก</span>
                                                                     <span id="sending" style="display:none;"></span>
+
                                                                 </button>
                                                             </div>
                                                         </form>
@@ -284,6 +306,11 @@
                     $('#memberForm').submit(function(e) {
                         e.preventDefault();
                         var formData = new FormData(this);
+                        var oTable = $('#membercustomer').dataTable();
+
+                            $("#btn-save").html('<i class="fa fa-refresh fa-spin fa-fw"></i>&nbsp; <span id="adduser">บันทึก</span>');
+                            $("#adduser").html('กำลังส่ง')
+                            $("#btn-save"). attr("disabled", true);
                         $.ajax({
                         type:'POST',
                         url: "{{ url('store-member')}}",
@@ -300,19 +327,23 @@
                                 timer: 1500
                               })
                             $("#scrollmodal").modal('hide');
-                            var oTable = $('#membercustomer').dataTable();
                             oTable.fnDraw(false);
-                            $("#btn-save").html('ส่งแล้ว');
+                            $("#btn-save").html('<i class="fa fa-user fa-lg"></i>&nbsp; <span id="adduser">บันทึก</span>');
+                            $("#adduser").html('บันทึก')
                             $("#btn-save"). attr("disabled", false);
+
                         },
                         error: function(data){
-                        console.log(data);
+
                         Swal.fire({
                             icon: 'error',
                             title: 'Oops...',
                             text: 'ไม่สามารถบันทึกข้อมูลได้!',
                             footer: 'อาจป้อนข้อมูลไม่ครบ'
                           });
+                          $("#btn-save").html('<i class="fa fa-user fa-lg"></i>&nbsp; <span id="adduser">บันทึก</span>');
+                            $("#adduser").html('บันทึก')
+                            $("#btn-save"). attr("disabled", false);
                         }
                     });
                 });

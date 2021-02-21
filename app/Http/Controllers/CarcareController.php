@@ -255,7 +255,7 @@ public function addcarcare(Request $request){
 	  public function member_carcare(){
         $data = DB::table('member')
                     ->where('member_type',2)
-                    ->where('carcare_id',null)
+                    ->where('carcare_id',0)
                     ->select('member_id','member_name')
                     ->get();
                     return response()->json($data);

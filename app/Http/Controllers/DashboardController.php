@@ -68,7 +68,7 @@ class DashboardController extends Controller
                 }else if($data->member_type==2){
                     $buttons='<a href="javascript:void(0)" class="btn btn-success" id="membertype">'.$data->member_type_name.'</a>';
                 }else if($data->member_type==1){
-                    $buttons='<a href="javascript:void(0)" class="btn btn-info" id="membertype">'.$data->member_type_name.'</a>';
+                    $buttons='<a href="javascript:void(0)" class="btn btn-warning" id="membertype">'.$data->member_type_name.'</a>';
                 }
                 return $buttons;
 
